@@ -14,6 +14,10 @@ def serve_html():
     with open("static/index.html", "r", encoding="utf-8") as f:
         return f.read()
 
+@app.get("/hello")
+async def hello():
+    return {"message": "Hello, World!"}
+
 @app.post("/remove-background/")
 async def remove_bg(file: UploadFile = File(...)):
     input_data = await file.read()

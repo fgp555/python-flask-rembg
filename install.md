@@ -28,3 +28,7 @@ python -m venv venv
 source venv/Scripts/activate
 pip install -r requirements.txt
 ```
+
+# Deploy
+
+https://cloud.seenode.com/dashboard/applications/web?applicationId=972313#settings
