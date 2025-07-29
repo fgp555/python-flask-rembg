@@ -3,45 +3,412 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quitar Fondo de Imagen</title>
+    <title>Quitar Fondo de Imagen - AI Background Remover</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+
     <style>
+      :root {
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.15);
+        --border-radius: 12px;
+        --animation-duration: 0.3s;
+      }
+
       html,
       body {
         height: 100%;
         margin: 0;
         padding: 0;
+        scroll-behavior: smooth;
       }
 
       body {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      }
+
+      [data-theme="dark"] body {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
       }
 
       main {
         flex: 1;
+        padding: 2rem 0;
+      }
+
+      .hero-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        animation: fadeInUp 0.8s ease-out;
+      }
+
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--muted-color);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+      }
+
+      .upload-section {
+        background: var(--card-background-color);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        margin-bottom: 2rem;
+        border: 2px dashed var(--border-color);
+        transition: all var(--animation-duration) ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .upload-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+      }
+
+      .upload-section:hover::before {
+        left: 100%;
+      }
+
+      .upload-section:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-heavy);
+        transform: translateY(-2px);
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 1.5rem;
+      }
+
+      .file-input-custom {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        border: 2px dashed var(--border-color);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all var(--animation-duration) ease;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      }
+
+      .file-input-custom:hover {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      }
+
+      .file-input-custom i {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+      }
+
+      .file-input-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color);
+        margin-bottom: 0.5rem;
+      }
+
+      .file-input-subtext {
+        font-size: 0.9rem;
+        color: var(--muted-color);
+      }
+
+      #image {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .submit-btn {
+        background: var(--gradient-primary);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--animation-duration) ease;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-heavy);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .submit-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+      }
+
+      .submit-btn:hover::before {
+        left: 100%;
+      }
+
+      .results-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .results-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .image-container {
+        background: var(--card-background-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        text-align: center;
+        transition: all var(--animation-duration) ease;
+      }
+
+      .image-container:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-heavy);
+      }
+
+      .image-container h3 {
+        margin-bottom: 1rem;
+        color: var(--color);
+        font-weight: 600;
+      }
+
+      .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        transition: all var(--animation-duration) ease;
+      }
+
+      .image-preview:hover {
+        transform: scale(1.02);
+      }
+
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        background: var(--card-background-color);
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+        box-shadow: var(--shadow-light);
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      .loading-text {
+        font-size: 1.1rem;
+        color: var(--color);
+        font-weight: 600;
+      }
+
+      .download-btn {
+        background: var(--gradient-secondary);
+        border: none;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--animation-duration) ease;
+        margin-top: 1rem;
+        box-shadow: var(--shadow-light);
+      }
+
+      .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-heavy);
       }
 
       #toggleThemeBtn {
         position: fixed;
-        bottom: 1rem;
-        right: 1rem;
+        bottom: 2rem;
+        right: 2rem;
         z-index: 1000;
         font-size: 1.2rem;
-        padding: 0.6rem 0.9rem;
+        padding: 0.8rem;
+        border-radius: 50%;
+        box-shadow: var(--shadow-light);
+        transition: all var(--animation-duration) ease;
       }
 
-      header,
-      footer {
-        padding: 1rem 0;
+      #toggleThemeBtn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-heavy);
+      }
+
+      header {
+        background: var(--card-background-color);
+        box-shadow: var(--shadow-light);
+        backdrop-filter: blur(10px);
+      }
+
+      nav strong {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.5rem;
       }
 
       footer {
+        background: var(--card-background-color);
         text-align: center;
-        font-size: 0.9rem;
+        padding: 2rem 0;
         color: var(--muted-color);
+        box-shadow: var(--shadow-light);
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 3rem 0;
+      }
+
+      .feature-card {
+        background: var(--card-background-color);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: all var(--animation-duration) ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-heavy);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin: 1rem 0;
+        font-weight: 600;
+      }
+
+      .alert-error {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #dc3545;
+      }
+
+      .alert-success {
+        background-color: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        color: #28a745;
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        53%,
+        80%,
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+        40%,
+        43% {
+          transform: translate3d(0, -30px, 0);
+        }
+        70% {
+          transform: translate3d(0, -15px, 0);
+        }
+        90% {
+          transform: translate3d(0, -4px, 0);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.6s ease-out;
       }
     </style>
   </head>
@@ -49,72 +416,84 @@
     <header class="container">
       <nav>
         <ul>
-          <li><strong>MiApp</strong></li>
+          <li>
+            <strong><i class="fas fa-magic"></i> RemoveBG AI</strong>
+          </li>
         </ul>
         <ul>
-          <li><a href="#">Inicio</a></li>
-          <li><a href="#">Acerca</a></li>
-          <li><a href="#">Contacto</a></li>
+          <li>
+            <a href="#" onclick="scrollToTop()"><i class="fas fa-home"></i> Inicio</a>
+          </li>
         </ul>
       </nav>
-      <hr />
     </header>
 
     <main class="container">
-      <h1>Quitar fondo de una imagen</h1>
+      <div class="hero-section">
+        <h1 class="hero-title">Elimina Fondos con IA</h1>
+        <p class="hero-subtitle">Transforma tus imágenes con tecnología de inteligencia artificial avanzada</p>
+      </div>
 
-      <form id="upload-form">
-        <input type="file" id="image" name="file" accept="image/*" required />
-        <button type="submit">Subir y Quitar Fondo</button>
-      </form>
+      <div class="upload-section">
+        <form id="upload-form">
+          <div class="file-input-wrapper">
+            <div class="file-input-custom" id="file-drop-area">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <div class="file-input-text">Selecciona o arrastra tu imagen aquí</div>
+              <div class="file-input-subtext">Formatos soportados: JPG, PNG, WEBP (Máx. 10MB)</div>
+              <input type="file" id="image" name="file" accept="image/*" required />
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn" disabled>
+            <i class="fas fa-scissors"></i> Quitar Fondo
+          </button>
+        </form>
 
-      <h2>Previsualización original:</h2>
-      <img id="preview" style="max-width: 300px; display: none; border: 1px solid #ccc; margin-bottom: 1rem" />
+        <div id="alert-container"></div>
+      </div>
 
-      <h2>Resultado:</h2>
-      <img id="result" style="max-width: 300px; display: none; border: 1px solid #ccc" />
+      <div class="loading-spinner" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Procesando imagen con IA...</div>
+        <p style="color: var(--muted-color); margin-top: 1rem">Esto puede tomar unos segundos</p>
+      </div>
 
-      <script>
-        const form = document.getElementById("upload-form");
-        const fileInput = document.getElementById("image");
-        const previewImage = document.getElementById("preview");
-        const resultImage = document.getElementById("result");
+      <div class="results-section" id="results-section" style="display: none">
+        <div class="image-container">
+          <h3><i class="fas fa-image"></i> Imagen Original</h3>
+          <img id="preview" class="image-preview" />
+        </div>
 
-        // Mostrar previsualización cuando se selecciona un archivo
-        fileInput.addEventListener("change", () => {
-          const file = fileInput.files[0];
-          if (file) {
-            previewImage.src = URL.createObjectURL(file);
-            previewImage.style.display = "block";
-            resultImage.style.display = "none"; // Oculta el resultado anterior
-          }
-        });
+        <div class="image-container">
+          <h3><i class="fas fa-cut"></i> Sin Fondo</h3>
+          <img id="result" class="image-preview" />
+          <button class="download-btn" id="download-btn" style="display: none">
+            <i class="fas fa-download"></i> Descargar PNG
+          </button>
+        </div>
+      </div>
 
-        // Enviar al backend y mostrar resultado sin fondo
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const formData = new FormData();
-          formData.append("file", fileInput.files[0]);
-
-          const response = await fetch("/remove-background/", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (response.ok) {
-            const blob = await response.blob();
-            resultImage.src = URL.createObjectURL(blob);
-            resultImage.style.display = "block";
-          } else {
-            alert("Error al procesar la imagen");
-          }
-        });
-      </script>
+      <div class="features">
+        <div class="feature-card">
+          <i class="fas fa-robot feature-icon"></i>
+          <h3>IA Avanzada</h3>
+          <p>Utiliza algoritmos de última generación para detectar y eliminar fondos con precisión.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-lightning-bolt feature-icon"></i>
+          <h3>Súper Rápido</h3>
+          <p>Procesamiento en segundos. No más esperas largas para obtener resultados profesionales.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-shield-alt feature-icon"></i>
+          <h3>100% Privado</h3>
+          <p>Tus imágenes se procesan de forma segura y no se almacenan en nuestros servidores.</p>
+        </div>
+      </div>
     </main>
 
     <footer class="container">
-      <p>&copy; 2025 MiEmpresa. Todos los derechos reservados.</p>
+      <p>&copy; 2025 RemoveBG AI. Todos los derechos reservados. | Desarrollado con ❤️ y tecnología IA</p>
     </footer>
 
     <button id="toggleThemeBtn" class="contrast" aria-label="Cambiar tema">
@@ -122,6 +501,175 @@
     </button>
 
     <script>
+      // Elements
+      const form = document.getElementById("upload-form");
+      const fileInput = document.getElementById("image");
+      const previewImage = document.getElementById("preview");
+      const resultImage = document.getElementById("result");
+      const loadingDiv = document.getElementById("loading");
+      const submitBtn = document.getElementById("submit-btn");
+      const downloadBtn = document.getElementById("download-btn");
+      const resultsSection = document.getElementById("results-section");
+      const fileDropArea = document.getElementById("file-drop-area");
+      const alertContainer = document.getElementById("alert-container");
+
+      let currentImageBlob = null;
+
+      // File validation
+      function validateFile(file) {
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/avif"];
+
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error("Formato no soportado. Use JPG, PNG o WEBP.");
+        }
+
+        if (file.size > maxSize) {
+          throw new Error("El archivo es muy grande. Máximo 10MB.");
+        }
+      }
+
+      // Show alert
+      function showAlert(message, type = "error") {
+        alertContainer.innerHTML = `
+          <div class="alert alert-${type} fade-in">
+            <i class="fas fa-${type === "error" ? "exclamation-triangle" : "check-circle"}"></i>
+            ${message}
+          </div>
+        `;
+        setTimeout(() => {
+          alertContainer.innerHTML = "";
+        }, 5000);
+      }
+
+      // File input handling
+      fileInput.addEventListener("change", handleFileSelect);
+
+      function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (file) {
+          try {
+            validateFile(file);
+            previewImage.src = URL.createObjectURL(file);
+            previewImage.onload = () => {
+              resultsSection.style.display = "grid";
+              resultsSection.classList.add("fade-in");
+            };
+            submitBtn.disabled = false;
+            resultImage.style.display = "none";
+            downloadBtn.style.display = "none";
+            alertContainer.innerHTML = "";
+          } catch (error) {
+            showAlert(error.message);
+            fileInput.value = "";
+            submitBtn.disabled = true;
+            resultsSection.style.display = "none";
+          }
+        }
+      }
+
+      // Drag and drop functionality
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        fileDropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        fileDropArea.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        fileDropArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      fileDropArea.addEventListener("drop", handleDrop, false);
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      function highlight() {
+        fileDropArea.style.borderColor = "var(--primary)";
+        fileDropArea.style.backgroundColor = "rgba(102, 126, 234, 0.1)";
+      }
+
+      function unhighlight() {
+        fileDropArea.style.borderColor = "var(--border-color)";
+        fileDropArea.style.backgroundColor = "";
+      }
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+          fileInput.files = files;
+          handleFileSelect();
+        }
+      }
+
+      // Form submission
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!fileInput.files[0]) {
+          showAlert("Por favor selecciona una imagen primero.");
+          return;
+        }
+
+        loadingDiv.style.display = "block";
+        loadingDiv.classList.add("fade-in");
+        resultImage.style.display = "none";
+        downloadBtn.style.display = "none";
+        submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+          const response = await fetch("/remove-background/", {
+            method: "POST",
+            body: formData,
+            headers: { Authorization: "Bearer my_secret_token" },
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            currentImageBlob = blob;
+            resultImage.src = URL.createObjectURL(blob);
+            resultImage.style.display = "block";
+            resultImage.classList.add("fade-in");
+            downloadBtn.style.display = "inline-block";
+            showAlert("¡Fondo eliminado exitosamente!", "success");
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Error al procesar la imagen");
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          showAlert(`Error: ${err.message}`);
+        } finally {
+          loadingDiv.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Download functionality
+      downloadBtn.addEventListener("click", () => {
+        if (currentImageBlob) {
+          const url = URL.createObjectURL(currentImageBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `sin-fondo-${Date.now()}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      });
+
+      // Theme functionality
       const toggleBtn = document.getElementById("toggleThemeBtn");
       const themeIcon = document.getElementById("themeIcon");
       const root = document.documentElement;
@@ -134,11 +682,11 @@
 
       function updateIcon(theme) {
         if (theme === "dark") {
-          themeIcon.classList.remove("fa-sun");
-          themeIcon.classList.add("fa-moon");
-        } else {
           themeIcon.classList.remove("fa-moon");
           themeIcon.classList.add("fa-sun");
+        } else {
+          themeIcon.classList.remove("fa-sun");
+          themeIcon.classList.add("fa-moon");
         }
       }
 
@@ -151,6 +699,21 @@
         const currentTheme = root.getAttribute("data-theme");
         const newTheme = currentTheme === "dark" ? "light" : "dark";
         setTheme(newTheme);
+      });
+
+      // Utility functions
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Clean up object URLs to prevent memory leaks
+      window.addEventListener("beforeunload", () => {
+        if (previewImage.src.startsWith("blob:")) {
+          URL.revokeObjectURL(previewImage.src);
+        }
+        if (resultImage.src.startsWith("blob:")) {
+          URL.revokeObjectURL(resultImage.src);
+        }
       });
     </script>
   </body>

@@ -1,0 +1,3 @@
+###
+GET http://localhost:5000/hello
+Authorization: Bearer my_secret_token
