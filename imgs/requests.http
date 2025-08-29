@@ -1,0 +1,79 @@
+###
+GET http://localhost:5000/ping
+Authorization: Bearer my_secret_token
+
+###
+GET http://localhost:5000/hello
+Authorization: Bearer my_secret_token
+
+### 1) PNG sin compresión ni redimensionar
+POST http://localhost:5000/v2.0/removebg?format=png
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+### 2) JPEG con compresión
+POST http://localhost:5000/v2.0/removebg?format=jpeg&compress_image=true
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+### 3) PNG redimensionado a 720px ancho máximo
+POST http://localhost:5000/v2.0/removebg?format=png&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+### 4) JPEG comprimido + redimensionado
+POST http://localhost:5000/v2.0/removebg?format=jpeg&compress_image=true&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+### 5) WEBP con compresión
+POST http://localhost:5000/v2.0/removebg?format=webp&compress_image=true
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+### 6) WEBP redimensionado a 720px
+POST http://localhost:5000/v2.0/removebg?format=webp&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
