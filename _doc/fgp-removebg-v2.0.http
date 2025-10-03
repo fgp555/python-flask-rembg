@@ -1,13 +1,13 @@
-###
-GET http://localhost:5000/ping
-Authorization: Bearer my_secret_token
+@BASE_URL=https://python.fgp.one
+@BASE_URL=https://api.frankgp.com
+@BASE_URL=http://localhost:5000
 
 ###
-GET http://localhost:5000/hello
+GET {{BASE_URL}}/ping
 Authorization: Bearer my_secret_token
 
 ### 1) PNG sin compresión ni redimensionar
-POST http://localhost:5000/v2.0/removebg?format=png
+POST {{BASE_URL}}/v2.0/removebg?format=png
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -19,7 +19,7 @@ Content-Type: image/png
 --boundary--
 
 ### 2) JPEG con compresión
-POST http://localhost:5000/v2.0/removebg?format=jpeg&compress_image=true
+POST {{BASE_URL}}/v2.0/removebg?format=jpeg&compress_image=true
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -31,7 +31,7 @@ Content-Type: image/png
 --boundary--
 
 ### 3) PNG redimensionado a 720px ancho máximo
-POST http://localhost:5000/v2.0/removebg?format=png&max_width=720
+POST {{BASE_URL}}/v2.0/removebg?format=png&max_width=720
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -43,7 +43,7 @@ Content-Type: image/png
 --boundary--
 
 ### 4) JPEG comprimido + redimensionado
-POST http://localhost:5000/v2.0/removebg?format=jpeg&compress_image=true&max_width=720
+POST {{BASE_URL}}/v2.0/removebg?format=jpeg&compress_image=true&max_width=720
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -55,7 +55,7 @@ Content-Type: image/png
 --boundary--
 
 ### 5) WEBP con compresión
-POST http://localhost:5000/v2.0/removebg?format=webp&compress_image=true
+POST {{BASE_URL}}/v2.0/removebg?format=webp&compress_image=true
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
@@ -67,7 +67,7 @@ Content-Type: image/png
 --boundary--
 
 ### 6) WEBP redimensionado a 720px
-POST http://localhost:5000/v2.0/removebg?format=webp&max_width=720
+POST {{BASE_URL}}/v2.0/removebg?format=webp&max_width=720
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 
