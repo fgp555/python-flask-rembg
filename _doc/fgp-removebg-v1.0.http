@@ -1,0 +1,26 @@
+@BASE_URL=https://python.fgp.one
+@BASE_URL=https://api.frankgp.com
+@BASE_URL=http://localhost:5000
+
+
+###
+GET https://api.frankgp.com/ping
+Authorization: Bearer my_secret_token
+
+
+###
+POST {{BASE_URL}}/v1.0/removebg
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image.png"
+Content-Type: image/png
+
+< ./image.png
+--boundary--
+
+
+###
+GET {{BASE_URL}}/hello
+Authorization: Bearer my_secret_token

@@ -14,7 +14,7 @@ async function removeBg(
   if (maxWidth) params.append("max_width", maxWidth);
   if (format) params.append("format", format);
 
-  const url = `http://localhost:5000/v2.0/removebg${
+  const url = `https://api.frankgp.com/v2.0/removebg${
     params.toString() ? "?" + params.toString() : ""
   }`;
 
@@ -31,7 +31,7 @@ async function removeBg(
   }
 }
 
-const inputPath = "./image.png";
+const inputPath = "../item-bottom01.jpg";
 const fileBlob = await fs.openAsBlob(inputPath);
 
 // ejemplo 1: PNG sin compresión

@@ -1,5 +1,5 @@
 *.jpg
-*.png
+# *.png
 *.webp
 *.ignore*
 tmp
@@ -52,3 +52,5 @@ target/
 # macOS / Windows files
 .DS_Store
 Thumbs.db
+
+*temp.*

@@ -5,7 +5,7 @@ async function removeBg(blob) {
   formData.append("size", "auto");
   formData.append("image_file", blob);
   // const url = "https://api.remove.bg/v1.0/removebg";
-  const url = "http://localhost:5000/v1.0/removebg";
+  const url = "https://api.frankgp.com/v1.0/removebg";
 
   const response = await fetch(url, {
     method: "POST",
@@ -20,7 +20,7 @@ async function removeBg(blob) {
   }
 }
 
-const inputPath = "./image.png";
+const inputPath = "../item-bottom01.jpg";
 const fileBlob = await fs.openAsBlob(inputPath);
 const rbgResultData = await removeBg(fileBlob);
 fs.writeFileSync("no-bg.png", Buffer.from(rbgResultData));

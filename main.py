@@ -1,11 +1,14 @@
 # main.py
-
 from flask import Flask, request, send_file
 from flask_cors import CORS
 from rembg import remove
 from io import BytesIO
 import os
 from PIL import Image
+import psutil
+import time
+
+start_time = time.time()
 
 # app = Flask(__name__, static_folder="static")
 app = Flask(__name__, static_folder="static", static_url_path="/")
@@ -16,10 +19,21 @@ API_KEY = "MY_API_KEY"
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    auth_header = request.headers.get("Authorization")
-    if auth_header != MOCK_BEARER_TOKEN:
-        return {"error": "Unauthorized"}, 401
     return "pong"
+
+@app.route("/status", methods=["GET"])
+def status():
+    cpu = psutil.cpu_percent(interval=0.2)
+    mem = psutil.virtual_memory().percent
+
+    return {
+        "status": "ok",
+        "cpu": cpu,
+        "memory": mem,
+        "busy": cpu > 85 or mem > 85,   # regla simple
+        "pid": os.getpid(),
+        "uptime": int(time.time() - start_time)
+    }
 
 @app.route("/v2.0/removebg", methods=["POST"])
 def remove_background_v2():
@@ -139,21 +153,12 @@ def app_page():
     except FileNotFoundError:
         return "<h1>index.html not found</h1>", 404
 
-@app.route("/app_basic", methods=["GET"])
-def app_basic():
-    try:
-        with open(os.path.join(app.static_folder, "index-picocss.html"), encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>index-picocss.html not found</h1>", 404
-
-@app.route("/hello", methods=["GET"])
-def hello():
+@app.route("/testToken", methods=["GET"])
+def testToken():
     auth_header = request.headers.get("Authorization")
     if auth_header != MOCK_BEARER_TOKEN:
         return {"error": "Unauthorized"}, 401
-    return "Hello, World!"
-
+    return "testToken"
 
 if __name__ == "__main__":
     app.run()
