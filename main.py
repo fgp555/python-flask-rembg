@@ -21,6 +21,20 @@ API_KEY = "MY_API_KEY"
 def ping():
     return "pong"
 
+active_jobs = 0
+
+@app.before_request
+def before():
+    global active_jobs
+    active_jobs += 1
+
+@app.after_request
+def after(response):
+    global active_jobs
+    active_jobs -= 1
+    return response
+
+
 @app.route("/status", methods=["GET"])
 def status():
     cpu = psutil.cpu_percent(interval=0.2)
@@ -33,6 +47,7 @@ def status():
         "busy": cpu > 85 or mem > 85,   # regla simple
         "pid": os.getpid(),
         "uptime": int(time.time() - start_time)
+        "active_jobs": active_jobs
     }
 
 @app.route("/v2.0/removebg", methods=["POST"])
