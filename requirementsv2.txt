@@ -1,0 +1,6 @@
+flask
+rembg[no-gpu]
+onnxruntime
+flask-cors
+psutil
+gunicorn

@@ -1,0 +1,99 @@
+@BASE_URL=https://python.fgp.one
+@BASE_URL=https://api.frankgp.com
+@BASE_URL=http://localhost:3000
+@BASE_URL=http://localhost:8000
+@BASE_URL=http://localhost:5000
+
+###
+GET {{BASE_URL}}/ping
+
+###
+GET {{BASE_URL}}/status
+
+### 1) PNG sin compresión ni redimensionar
+POST {{BASE_URL}}/v2.0/removebg?format=png
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### 2) JPEG con compresión
+POST {{BASE_URL}}/v2.0/removebg?format=jpeg&compress_image=true
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### 3) PNG redimensionado a 720px ancho máximo
+POST {{BASE_URL}}/v2.0/removebg?format=png&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### 4) JPEG comprimido + redimensionado
+POST {{BASE_URL}}/v2.0/removebg?format=jpeg&compress_image=true&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### 5) WEBP con compresión
+POST {{BASE_URL}}/v2.0/removebg?format=webp&compress_image=true
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### 6) WEBP redimensionado a 720px
+POST {{BASE_URL}}/v2.0/removebg?format=webp&max_width=720
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+### v1.0
+POST {{BASE_URL}}/v1.0/removebg
+X-Api-Key: MY_API_KEY
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Type: image/png
+
+< ./images/image-2k.png
+--boundary--
+
+###
+GET {{BASE_URL}}/authTest
+Authorization: Bearer my_secret_token
