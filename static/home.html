@@ -3,15 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frank-gp.github.io/component/stat.js" type="module"></script>
     <title>Acceso restringido</title>
     <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+      }
+
       .developer-credit {
         font-family: sans-serif;
         max-width: 600px;
-        margin: 4rem auto;
-        padding: 1rem;
+        padding: 2rem;
         text-align: center;
         color: #222;
+        background: #fff; /* opcional */
+        border-radius: 8px; /* opcional */
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); /* opcional */
       }
 
       .credit-footer {
@@ -29,33 +44,47 @@
         text-decoration: underline;
       }
     </style>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const hostnameList = ["appsystered.com", "dev.appsystered.com", "api.appsystered.com"];
-        const isSysteredDomain = hostnameList.includes(window.location.hostname);
-
-        const infoFrank = {
-          name: "Frank GP",
-          site: "https://frankgp.com/contact",
-        };
-
-        const infoSystered = {
-          name: "Systered",
-          site: "https://www.systered.com/contactenos",
-        };
-
-        const data = isSysteredDomain ? infoSystered : infoFrank;
-
-        const creditFooter = document.getElementById("credit-footer");
-        creditFooter.innerHTML = `Desarrollado por <a href="${data.site}" target="_blank" rel="noopener noreferrer">${data.name}</a>`;
-      });
-    </script>
   </head>
   <body>
     <main class="developer-credit">
+      <h1>REMBG</h1>
       <h1>Acceso restringido</h1>
-      <p>Para acceder, escanea el código QR o contacta al desarrollador.</p>
+      <p>Para acceder contacta al desarrollador.</p>
       <div id="credit-footer" class="credit-footer"></div>
     </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const clients = [
+          {
+            name: "Frank GP",
+            baseDomain: "frankgp.com",
+            contact: "https://frankgp.com/contact",
+            isDefault: true,
+          },
+          {
+            name: "Systered",
+            baseDomain: "appsystered.com",
+            contact: "https://appsystered.com/contactenos",
+          },
+          {
+            name: "Ivana Geraldine",
+            baseDomain: "ivanageraldine.com",
+            contact: "https://ivanageraldine.com/contact",
+          },
+        ];
+
+        const hostname = window.location.hostname;
+
+        const clientMatch =
+          clients.find((client) => hostname === client.baseDomain || hostname.endsWith("." + client.baseDomain)) ||
+          clients.find((client) => client.isDefault);
+
+        const creditFooter = document.getElementById("credit-footer");
+        creditFooter.innerHTML = `Desarrollado por 
+      <a href="${clientMatch.contact}" target="_blank" rel="noopener noreferrer">
+        ${clientMatch.name}
+      </a>`;
+      });
+    </script>
   </body>
 </html>

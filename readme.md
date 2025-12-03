@@ -2,6 +2,7 @@
 
 ```sh
 python --version
+rm -rf venv __pycache__
 
 python -m venv venv
 source venv/Scripts/activate
@@ -26,3 +27,21 @@ Passenger-log-file: repositories/1python-flask-rembg.log
 
 Configuration-files: requirements.txt
 ```
+
+### Produccion
+
+http://rembg.frankgp.com
+https://rembg.appsystered.com
+https://rembg.e-transportech.org
+
+### dev
+
+http://api.frankgp.com
+https://api.appsystered.com
+https://py.fgp.one
+
+### task
+
+https://api.ivanageraldine.com
+https://rembg-balancer.ivanageraldine.com
+https://rembg.ivanageraldine.com

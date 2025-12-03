@@ -173,7 +173,7 @@ def home():
 
 @app.route("/app", methods=["GET"])
 def app_page():
-    return _static_file("index.html")
+    return _static_file("app.html")
 
 
 def _static_file(filename):

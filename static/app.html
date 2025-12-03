@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frank-gp.github.io/component/stat.js" type="module"></script>
+    <title>Remove Background v2.0</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- LOGIN -->
+    <div id="loginBox">
+      <h2>Acceso restringido</h2>
+      <input type="password" id="passwordInput" placeholder="Password" />
+      <br />
+      <button class="btn btn-primary" onclick="login()">Ingresar</button>
+      <p id="loginError" style="color: red"></p>
+    </div>
+
+    <!-- APP -->
+    <div id="app">
+      <div class="top-bar">
+        <h2>Remove Background (API v2.0)</h2>
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
+      </div>
+
+      <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" /><br />
+
+      <label>Formato:</label>
+      <select id="format">
+        <option value="png">PNG</option>
+        <option value="jpeg">JPEG</option>
+        <option value="webp">WEBP</option>
+      </select>
+
+      <label>
+        <input type="checkbox" id="compress" />
+        Comprimir
+      </label>
+
+      <label>
+        Max height (px):
+        <input type="number" id="maxHeight" value="720" min="1" style="width: 90px" />
+      </label>
+
+      <label>
+        API URL:
+        <input type="text" id="apiBaseUrl" placeholder="http://localhost:8000" style="width: 260px" value="" />
+      </label>
+
+      <br />
+      <button class="btn btn-primary" onclick="uploadImage()">Procesar</button>
+
+      <div class="preview-container">
+        <div class="preview-box">
+          <h3>Antes</h3>
+          <img id="previewBefore" />
+        </div>
+
+        <div class="preview-box">
+          <h3>Después</h3>
+          <img id="previewAfter" />
+        </div>
+      </div>
+
+      <div id="result"></div>
+    </div>
+    <script src="login.js"></script>
+    <script>
+      const apiInput = document.getElementById("apiBaseUrl");
+
+      const storedApi = localStorage.getItem("apiBaseUrl");
+
+      apiInput.value = storedApi ? storedApi : window.location.origin;
+
+      /* ======================
+         APP
+      ====================== */
+      const fileInput = document.getElementById("fileInput");
+      const previewBefore = document.getElementById("previewBefore");
+      const previewAfter = document.getElementById("previewAfter");
+      const resultDiv = document.getElementById("result");
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        previewBefore.src = URL.createObjectURL(file);
+        previewAfter.src = "";
+        resultDiv.innerHTML = "";
+      });
+
+      async function uploadImage() {
+        const format = document.getElementById("format").value;
+        const compress = document.getElementById("compress").checked;
+        const maxHeight = document.getElementById("maxHeight").value;
+        const apiBaseUrl = document.getElementById("apiBaseUrl").value.trim();
+
+        if (!apiBaseUrl.startsWith("http")) {
+          alert("API URL inválida. Debe comenzar con http o https");
+          return;
+        }
+
+        // guardar para próximas sesiones
+        localStorage.setItem("apiBaseUrl", apiBaseUrl);
+
+        if (!fileInput.files.length) {
+          alert("Selecciona una imagen");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("image_file", fileInput.files[0]);
+
+        const params = new URLSearchParams({ format });
+        if (compress) params.append("compress_image", "true");
+        if (maxHeight && parseInt(maxHeight) > 0) {
+          params.append("max_height", maxHeight);
+        }
+
+        resultDiv.innerHTML = `<p class="loading">⏳ Procesando...</p>`;
+
+        const startTime = performance.now();
+
+        try {
+          const response = await fetch(`${apiBaseUrl}/v2.0/removebg?${params}`, {
+            method: "POST",
+            headers: { "X-Api-Key": "MY_API_KEY" },
+            body: formData,
+          });
+
+          if (!response.ok) throw new Error();
+
+          const blob = await response.blob();
+          const imgURL = URL.createObjectURL(blob);
+          previewAfter.src = imgURL;
+
+          const elapsedMs = performance.now() - startTime;
+          const elapsedText = elapsedMs > 1000 ? (elapsedMs / 1000).toFixed(2) + " s" : elapsedMs.toFixed(0) + " ms";
+
+          const sizeKB = blob.size / 1024;
+          const sizeText = sizeKB > 1024 ? (sizeKB / 1024).toFixed(2) + " MB" : sizeKB.toFixed(2) + " KB";
+
+          resultDiv.innerHTML = `
+      <p><strong>API:</strong> ${apiBaseUrl}</p>
+      <p><strong>Tamaño:</strong> ${sizeText}</p>
+      <p><strong>Tiempo de proceso:</strong> ${elapsedText}</p>
+      <a class="btn btn-success" download href="${imgURL}">
+        Descargar
+      </a>
+    `;
+        } catch {
+          resultDiv.innerHTML = `<p style="color:red">❌ Error al procesar</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>
