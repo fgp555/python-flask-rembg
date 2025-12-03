@@ -100,40 +100,47 @@ def remove_background_v2():
         return {"error": "Missing 'image_file'"}, 400
 
     file = request.files["image_file"]
-    output_data = remove(file.read())
-
+    max_height = request.args.get("max_height")
     compress_image = request.args.get("compress_image", "false").lower() == "true"
-    max_width = request.args.get("max_width")
     output_format = request.args.get("format", "png").lower()
 
-    img = Image.open(BytesIO(output_data))
+    # Abrir imagen original
+    img = Image.open(file)
 
-    if max_width and max_width.isdigit():
-        max_width = int(max_width)
-        if img.width > max_width:
-            ratio = max_width / img.width
+    # Redimensionar antes de eliminar el fondo
+    if max_height and max_height.isdigit():
+        max_height = int(max_height)
+        if img.height > max_height:
+            ratio = max_height / img.height
             img = img.resize(
-                (max_width, int(img.height * ratio)),
+                (int(img.width * ratio), max_height),
                 Image.LANCZOS
             )
 
-    buffer = BytesIO()
+    # Convertir la imagen redimensionada a bytes para rembg
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    output_data = remove(buf.read())
 
+    # Abrir resultado de rembg
+    img = Image.open(BytesIO(output_data))
+
+    # Guardar salida en el formato solicitado
+    buffer = BytesIO()
     if output_format == "jpeg":
         img.convert("RGB").save(buffer, "JPEG", quality=70 if compress_image else 95)
         mimetype, filename = "image/jpeg", "no-bg.jpg"
-
     elif output_format == "webp":
         img.save(buffer, "WEBP", quality=70 if compress_image else 95)
         mimetype, filename = "image/webp", "no-bg.webp"
-
     else:
         img.save(buffer, "PNG", optimize=True)
         mimetype, filename = "image/png", "no-bg.png"
 
     buffer.seek(0)
-
     return send_file(buffer, mimetype=mimetype, download_name=filename)
+
 
 
 # =========================

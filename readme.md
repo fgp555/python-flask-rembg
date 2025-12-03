@@ -13,3 +13,16 @@ nodemon --exec "python" main.py
 
 deactivate
 ```
+
+# Deploy en CPanel
+
+```sh
+Python-version: 3.12.11
+Application-root: repositories/python-flask-rembg
+Application-URL: https://rembg.frankgp.com
+Application-startup-file: passenger_wsgi.py
+Application-Entry-point: application
+Passenger-log-file: repositories/1python-flask-rembg.log
+
+Configuration-files: requirements.txt
+```

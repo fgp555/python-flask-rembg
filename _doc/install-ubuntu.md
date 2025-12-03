@@ -1,41 +1,44 @@
+```sh
+# Desinstalar / Importar el snapshot
+wsl --unregister Ubuntu
+wsl --import Ubuntu D:/wsl2/Ubuntu D:/wsl2/ubuntu_snapshot.tar --version 2
+```
+
 # Installation Ubuntu
 
 ```sh
+rm -rf venv __pycache__
 wsl
 python3 --version
+
 sudo apt update
+sudo apt install -y python3.12-venv python3-pip
+pip --version
 
 python3  -m venv venv
 source venv/bin/activate
+pip install -r requirements_v1.txt
+pip install -r requirements_v2.txt
 deactivate
-pip install -r requirementsv2.txt
 
-sudo apt install python3.12-venv -y
-sudo apt install -y python3 python3-pip python3-venv nginx
-sudo apt install -y python3-full python3-venv python3-pip
-pip install gunicorn flask rembg pillow psutil
-
-python3 mainv2.py
-flask --app mainv2.py run --reload
-nodemon --exec "python" mainv2.py
+python3 main_v2.py
+flask --app main_v2.py run --reload
+nodemon --exec "python" main_v2.py
 curl http://127.0.0.1:5000/
 curl http://127.0.0.1:5000/ping
 ```
 
-# 🔫 7. Ejecutar con Gunicorn (producción)
+# 🔫 Ejecutar con Gunicorn (producción)
 
 ```sh
 pip install gunicorn
-pip install gunicorn flask flask-cors rembg pillow
-gunicorn --bind 127.0.0.1:8000 main:app
+which gunicorn
+gunicorn --bind 127.0.0.1:8000 main_v2:app
 
 curl http://127.0.0.1:8000/ping
 
-which gunicorn
-
 # Crear servicio systemd (auto-start)
 sudo vim /etc/systemd/system/removebg.service
-
 ```
 
 # removebg.service
@@ -53,7 +56,7 @@ Environment="PATH=/home/ubuntu/python-flask-rembg/venv/bin"
 ExecStart=/home/ubuntu/python-flask-rembg/venv/bin/gunicorn \
           --workers 2 \
           --bind 127.0.0.1:8000 \
-          main:app
+          main_v2:app
 
 Restart=always
 
@@ -76,7 +79,7 @@ ExecStart=/var/www/removebg/venv/bin/gunicorn \
         --threads 1 \
         --timeout 120 \
         --bind 127.0.0.1:8000 \
-        main:app
+        main_v2:app
 
 Restart=always
 

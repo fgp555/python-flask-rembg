@@ -1,5 +1,4 @@
 # main.py
-
 from flask import Flask, request, send_file
 from flask_cors import CORS
 from rembg import remove
@@ -16,9 +15,6 @@ API_KEY = "MY_API_KEY"
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    auth_header = request.headers.get("Authorization")
-    if auth_header != MOCK_BEARER_TOKEN:
-        return {"error": "Unauthorized"}, 401
     return "pong"
 
 @app.route("/v2.0/removebg", methods=["POST"])
@@ -126,10 +122,10 @@ def remove_background():
 @app.route("/", methods=["GET"])
 def home():
     try:
-        with open(os.path.join(app.static_folder, "dev-credit.html"), encoding="utf-8") as f:
+        with open(os.path.join(app.static_folder, "home.html"), encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        return "<h1>dev-credit.html not found</h1>", 404
+        return "<h1>home.html not found</h1>", 404
 
 @app.route("/app", methods=["GET"])
 def app_page():
@@ -138,22 +134,6 @@ def app_page():
             return f.read()
     except FileNotFoundError:
         return "<h1>index.html not found</h1>", 404
-
-@app.route("/app_basic", methods=["GET"])
-def app_basic():
-    try:
-        with open(os.path.join(app.static_folder, "index-picocss.html"), encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>index-picocss.html not found</h1>", 404
-
-@app.route("/hello", methods=["GET"])
-def hello():
-    auth_header = request.headers.get("Authorization")
-    if auth_header != MOCK_BEARER_TOKEN:
-        return {"error": "Unauthorized"}, 401
-    return "Hello, World!"
-
 
 if __name__ == "__main__":
     app.run()

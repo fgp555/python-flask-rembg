@@ -1,3 +1,4 @@
+require("dotenv").config({ quiet: true });
 const express = require("express");
 const axios = require("axios");
 const morgan = require("morgan");
@@ -10,13 +11,14 @@ const app = express();
  * CONFIG
  * ================================
  */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-const workers = ["https://py.fgp.one", "http://localhost:8000"];
+// Convertimos el string de .env a array
+const workers = process.env.WORKERS ? process.env.WORKERS.split(",") : [];
 
-const MAX_CPU = 85;
-const MAX_MEM = 85;
-const STATUS_TIMEOUT = 1500;
+const MAX_CPU = parseInt(process.env.MAX_CPU) || 85;
+const MAX_MEM = parseInt(process.env.MAX_MEM) || 85;
+const STATUS_TIMEOUT = parseInt(process.env.STATUS_TIMEOUT) || 1500;
 
 /**
  * ================================
