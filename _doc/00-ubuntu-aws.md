@@ -17,6 +17,7 @@ pip --version
 
 git clone https://github.com/fgp555/python-flask-rembg.git
 
+cd python-flask-rembg
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -72,6 +73,7 @@ WantedBy=multi-user.target
 # Aplicar cambios
 sudo systemctl daemon-reload
 sudo systemctl restart removebg
+sudo systemctl enable removebg
 
 # Ver estado
 sudo systemctl status removebg
@@ -98,7 +100,7 @@ sudo vim /etc/nginx/sites-available/removebg
 ```js
 server {
     listen 80;
-    server_name 3.137.211.145;
+    server_name rembg2.ivanageraldine.com;
 
     client_max_body_size 20M;
 
@@ -114,12 +116,13 @@ server {
 
 ```sh
 sudo ln -s /etc/nginx/sites-available/removebg /etc/nginx/sites-enabled/
+sudo vim /etc/nginx/sites-enabled/removebg
 sudo nginx -t
 sudo systemctl restart nginx
 
-curl localhost
-curl http://3.137.211.145
-curl http://3.137.211.145/ping
+curl localhost/ping
+curl http://91.108.126.37/ping
+curl http://rembg2.ivanageraldine.com/ping
 
 # Ver logs recientes del servicio
 sudo journalctl -u removebg.service -n 50
