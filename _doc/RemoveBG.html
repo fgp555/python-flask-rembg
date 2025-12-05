@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RemoveBG Multi Preview</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 900px;
+        margin: 2rem auto;
+        background: rgb(26, 124, 26);
+        color: white;
+      }
+      #results {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .image-item {
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        text-align: center;
+      }
+      img.preview {
+        max-width: 100%;
+        display: none;
+        margin-top: 0.5rem;
+      }
+      .time {
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>RemoveBG Multi Preview</h1>
+
+    <input type="file" id="files" multiple accept="image/*" /><br /><br />
+    <button id="start">Procesar imágenes</button>
+
+    <div id="results"></div>
+
+    <script>
+      const API_URL = "http://localhost:8000/v2.0/removebg";
+      const API_KEY = "MY_API_KEY";
+      const MAX_CONCURRENT = 2;
+
+      document.getElementById("start").addEventListener("click", async () => {
+        const files = Array.from(document.getElementById("files").files);
+        if (!files.length) return alert("Selecciona al menos una imagen");
+
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
+
+        const queue = [...files];
+        let active = 0;
+
+        function createItem(file) {
+          const container = document.createElement("div");
+          container.className = "image-item";
+          container.innerHTML = `<strong>${file.name}</strong>
+            <div class="time">Tiempo: 0s</div>
+            <img class="preview">`;
+          resultsDiv.appendChild(container);
+          return {
+            preview: container.querySelector(".preview"),
+            timeEl: container.querySelector(".time"),
+          };
+        }
+
+        async function upload(file, preview, timeEl) {
+          const formData = new FormData();
+          formData.append("image_file", file);
+
+          const start = Date.now();
+
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "X-Api-Key": API_KEY },
+            body: formData,
+          });
+
+          const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+          timeEl.textContent = `Tiempo: ${elapsed}s`;
+
+          if (!res.ok) throw new Error(`Error ${res.status}`);
+          const blob = await res.blob();
+          preview.src = URL.createObjectURL(blob);
+          preview.style.display = "block";
+        }
+
+        async function next() {
+          if (!queue.length) return;
+          while (active < MAX_CONCURRENT && queue.length) {
+            const file = queue.shift();
+            const { preview, timeEl } = createItem(file);
+            active++;
+            upload(file, preview, timeEl)
+              .catch((err) => {
+                timeEl.textContent = `Error: ${err}`;
+                console.error(file.name, err);
+              })
+              .finally(() => {
+                active--;
+                next();
+              });
+          }
+        }
+
+        next();
+      });
+    </script>
+  </body>
+</html>

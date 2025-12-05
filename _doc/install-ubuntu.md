@@ -15,15 +15,16 @@ sudo apt update
 sudo apt install -y python3.12-venv python3-pip
 pip --version
 
-python3  -m venv venv
+git clone https://github.com/fgp555/python-flask-rembg.git
+
+python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements_v1.txt
-pip install -r requirements_v2.txt
+pip install -r requirements.txt
 deactivate
 
-python3 main_v2.py
-flask --app main_v2.py run --reload
-nodemon --exec "python" main_v2.py
+python3 main.py
+flask --app main.py run --reload
+nodemon --exec "python" main.py
 curl http://127.0.0.1:5000/
 curl http://127.0.0.1:5000/ping
 ```
@@ -33,7 +34,8 @@ curl http://127.0.0.1:5000/ping
 ```sh
 pip install gunicorn
 which gunicorn
-gunicorn --bind 127.0.0.1:8000 main_v2:app
+gunicorn --bind 127.0.0.1:8000 main:app
+gunicorn --workers 2 --threads 1 --bind 0.0.0.0:8000 main:app
 
 curl http://127.0.0.1:8000/ping
 
@@ -54,32 +56,11 @@ Group=www-data
 WorkingDirectory=/home/ubuntu/python-flask-rembg
 Environment="PATH=/home/ubuntu/python-flask-rembg/venv/bin"
 ExecStart=/home/ubuntu/python-flask-rembg/venv/bin/gunicorn \
-          --workers 2 \
+          --workers 1 \
+          --threads 1 \
+          --timeout 120 \
           --bind 127.0.0.1:8000 \
-          main_v2:app
-
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```ini
-[Unit]
-Description=Gunicorn Flask RemoveBG API
-After=network.target
-
-[Service]
-User=ubuntu
-Group=www-data
-WorkingDirectory=/home/ubuntu/python-flask-rembg
-Environment="PATH=/home/ubuntu/python-flask-rembg/venv/bin"
-ExecStart=/var/www/removebg/venv/bin/gunicorn \
-        --workers 1 \
-        --threads 1 \
-        --timeout 120 \
-        --bind 127.0.0.1:8000 \
-        main_v2:app
+          main:app
 
 Restart=always
 
@@ -92,53 +73,32 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload
 sudo systemctl restart removebg
 
-# Activar
-sudo systemctl daemon-reload
-sudo systemctl start removebg
-sudo systemctl enable removebg
-
 # Ver estado
 sudo systemctl status removebg
-
-sudo systemctl daemon-reload
-sudo systemctl restart removebg
 sudo systemctl status removebg -l
 
 # Ver los logs en tiempo real
 journalctl -u removebg -f
-
-
 ```
 
 # 🌍 9. Configurar Nginx (IP pública → Flask)
 
 ```sh
+sudo apt install nginx -y
+sudo systemctl status nginx
+nginx -v
+sudo systemctl enable nginx
+
+
 sudo vim /etc/nginx/sites-available/removebg
 ```
 
-```ini
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# removebg
 
-    server_name _;
-
-    client_max_body_size 50M;
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-```ini
+```js
 server {
     listen 80;
-    server_name 18.222.21.11;
+    server_name 3.137.211.145;
 
     client_max_body_size 20M;
 
@@ -153,33 +113,29 @@ server {
 ```
 
 ```sh
-# Revisa TODOS los server blocks activos
-ls -l /etc/nginx/sites-enabled/
-sudo tail -n 50 /var/log/nginx/error.log
-
-# Activar sitio:
-sudo rm /etc/nginx/sites-enabled/removebg
-sudo rm /etc/nginx/sites-enabled/aws_rds
 sudo ln -s /etc/nginx/sites-available/removebg /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 
-sudo rm /etc/nginx/sites-enabled/default
-sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
+curl localhost
+curl http://3.137.211.145
+curl http://3.137.211.145/ping
 
+# Ver logs recientes del servicio
+sudo journalctl -u removebg.service -n 50
 
+# Ver logs en tiempo real (modo "follow")
+sudo journalctl -u removebg.service -f
+```
 
-curl http://18.222.21.11/
-curl http://18.222.21.11/ping
+## 🔥 Carga REAL con imágenes
 
-sudo systemctl stop removebg
-# Verificar que 8000 esté libre
-sudo lsof -i :8000
+```bash
+mkdir -p out
 
-# Reiniciar el service systemd correctamente
-sudo systemctl start removebg
-sudo systemctl status removebg -l
+ls *.png | xargs -n 1 -P 4 -I {} curl -X POST \
+  -H "X-Api-Key: MY_API_KEY" \
+  -F "image_file=@{}" \
+  http://localhost:8000/v2.0/removebg -o out/{}
 
 ```
