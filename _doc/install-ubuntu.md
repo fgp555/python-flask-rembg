@@ -51,11 +51,11 @@ Description=Gunicorn Flask RemoveBG API
 After=network.target
 
 [Service]
-User=ubuntu
+User=root
 Group=www-data
-WorkingDirectory=/home/ubuntu/python-flask-rembg
-Environment="PATH=/home/ubuntu/python-flask-rembg/venv/bin"
-ExecStart=/home/ubuntu/python-flask-rembg/venv/bin/gunicorn \
+WorkingDirectory=/root/python-flask-rembg
+Environment="PATH=/root/python-flask-rembg/venv/bin"
+ExecStart=/root/python-flask-rembg/venv/bin/gunicorn \
           --workers 1 \
           --threads 1 \
           --timeout 120 \
@@ -98,7 +98,7 @@ sudo vim /etc/nginx/sites-available/removebg
 ```js
 server {
     listen 80;
-    server_name 3.137.211.145;
+    server_name 91.108.126.37;
 
     client_max_body_size 20M;
 
@@ -118,8 +118,8 @@ sudo nginx -t
 sudo systemctl restart nginx
 
 curl localhost
-curl http://3.137.211.145
-curl http://3.137.211.145/ping
+curl http://91.108.126.37
+curl http://91.108.126.37/ping
 
 # Ver logs recientes del servicio
 sudo journalctl -u removebg.service -n 50
