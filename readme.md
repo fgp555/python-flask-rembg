@@ -45,3 +45,5 @@ https://py.fgp.one
 https://api.ivanageraldine.com
 https://rembg-balancer.ivanageraldine.com
 https://rembg.ivanageraldine.com
+http://91.108.126.37
+https://rembg2.ivanageraldine.com

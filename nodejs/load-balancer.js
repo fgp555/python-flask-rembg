@@ -14,7 +14,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Convertimos el string de .env a array
-const workers = process.env.WORKERS ? process.env.WORKERS.split(",") : [];
+const workers = process.env.WORKERS ? process.env.WORKERS.split(",") : ["http://91.108.126.37"];
+console.log("workers", workers);
 
 const MAX_CPU = parseInt(process.env.MAX_CPU) || 85;
 const MAX_MEM = parseInt(process.env.MAX_MEM) || 85;
