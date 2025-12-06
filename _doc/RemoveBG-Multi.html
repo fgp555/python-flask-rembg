@@ -12,10 +12,21 @@
         background: rgb(26, 124, 26);
         color: white;
       }
+      label {
+        display: block;
+        margin-top: 0.5rem;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 0.4rem;
+        margin-top: 0.2rem;
+      }
       #results {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 1rem;
+        margin-top: 1rem;
       }
       .image-item {
         border: 1px solid #ccc;
@@ -36,19 +47,40 @@
   <body>
     <h1>RemoveBG Multi Preview</h1>
 
+    <label>
+      API URL
+      <input type="text" id="apiUrl" placeholder="API_URL" />
+    </label>
+
+    <label>
+      Máximo de procesos simultáneos
+      <input type="number" id="maxConcurrent" min="1" value="2" />
+    </label>
+
+    <br />
+
     <input type="file" id="files" multiple accept="image/*" /><br /><br />
     <button id="start">Procesar imágenes</button>
 
     <div id="results"></div>
 
     <script>
-      const API_URL = "http://localhost:8000/v2.0/removebg";
+      // Defaults
+      const DEFAULT_API_URL = window.location.origin + "/v2.0/removebg";
       const API_KEY = "MY_API_KEY";
-      const MAX_CONCURRENT = 2;
+
+      // Set default API_URL in input
+      document.getElementById("apiUrl").value = DEFAULT_API_URL;
 
       document.getElementById("start").addEventListener("click", async () => {
         const files = Array.from(document.getElementById("files").files);
-        if (!files.length) return alert("Selecciona al menos una imagen");
+        if (!files.length) {
+          alert("Selecciona al menos una imagen");
+          return;
+        }
+
+        const API_URL = document.getElementById("apiUrl").value.trim();
+        const MAX_CONCURRENT = parseInt(document.getElementById("maxConcurrent").value, 10) || 1;
 
         const resultsDiv = document.getElementById("results");
         resultsDiv.innerHTML = "";
@@ -59,9 +91,11 @@
         function createItem(file) {
           const container = document.createElement("div");
           container.className = "image-item";
-          container.innerHTML = `<strong>${file.name}</strong>
+          container.innerHTML = `
+            <strong>${file.name}</strong>
             <div class="time">Tiempo: 0s</div>
-            <img class="preview">`;
+            <img class="preview">
+          `;
           resultsDiv.appendChild(container);
           return {
             preview: container.querySelector(".preview"),
@@ -84,21 +118,22 @@
           const elapsed = ((Date.now() - start) / 1000).toFixed(2);
           timeEl.textContent = `Tiempo: ${elapsed}s`;
 
-          if (!res.ok) throw new Error(`Error ${res.status}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
           const blob = await res.blob();
           preview.src = URL.createObjectURL(blob);
           preview.style.display = "block";
         }
 
-        async function next() {
-          if (!queue.length) return;
+        function next() {
           while (active < MAX_CONCURRENT && queue.length) {
             const file = queue.shift();
             const { preview, timeEl } = createItem(file);
             active++;
+
             upload(file, preview, timeEl)
               .catch((err) => {
-                timeEl.textContent = `Error: ${err}`;
+                timeEl.textContent = `Error: ${err.message}`;
                 console.error(file.name, err);
               })
               .finally(() => {

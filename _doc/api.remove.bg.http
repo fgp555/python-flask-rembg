@@ -4,10 +4,10 @@ X-Api-Key: 1iHxMgoQAgdc68uGSFTiLRGo
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
-Content-Disposition: form-data; name="image_file"; filename="image-2k.png"
+Content-Disposition: form-data; name="image_file"; filename="camisa-rayas.jpg"
 Content-Type: image/png
 
-< ./images/image-2k.png
+< ./images/camisa-rayas.jpg
 --boundary--
 
 ###

@@ -45,7 +45,7 @@ sudo vim /etc/systemd/system/removebg.service
 
 # removebg.service
 
-```ini
+```conf
 [Unit]
 Description=Gunicorn Flask RemoveBG API
 After=network.target
@@ -56,9 +56,13 @@ Group=www-data
 WorkingDirectory=/root/python-flask-rembg
 Environment="PATH=/root/python-flask-rembg/venv/bin"
 ExecStart=/root/python-flask-rembg/venv/bin/gunicorn \
-          --workers 1 \
+          --workers 3 \
           --threads 1 \
           --timeout 120 \
+          --max-requests 200 \
+          --max-requests-jitter 20 \
+          --access-logfile - \
+          --error-logfile - \
           --bind 127.0.0.1:8000 \
           main:app
 
@@ -70,8 +74,10 @@ WantedBy=multi-user.target
 
 ```sh
 # Aplicar cambios
-sudo systemctl daemon-reload
-sudo systemctl restart removebg
+sudo systemctl daemon-reexec    # recarga systemd (binarios) / solo si systemd se actualizó
+sudo systemctl daemon-reload    # recarga unit files / SIEMPRE tras editar .service
+sudo systemctl restart removebg # reinicia servicio
+sudo systemctl status removebg  # ver estado
 
 # Ver estado
 sudo systemctl status removebg
@@ -108,13 +114,16 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
     }
 }
 ```
 
 ```sh
 sudo ln -s /etc/nginx/sites-available/removebg /etc/nginx/sites-enabled/
-sudo vim /etc/nginx/sites-enabled/removebg
+cat /etc/nginx/sites-enabled/removebg
 sudo nginx -t
 sudo systemctl restart nginx
 

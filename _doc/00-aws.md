@@ -36,7 +36,7 @@ curl http://127.0.0.1:5000/ping
 pip install gunicorn
 which gunicorn
 gunicorn --bind 127.0.0.1:8000 main:app
-gunicorn --workers 2 --threads 1 --bind 0.0.0.0:8000 main:app
+gunicorn --workers 4 --threads 1 --bind 0.0.0.0:8000 main:app
 
 curl http://127.0.0.1:8000/ping
 

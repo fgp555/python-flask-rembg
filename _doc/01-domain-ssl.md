@@ -16,7 +16,7 @@ curl http://91.108.126.37
 
 # Config Domains and Subdomains
 
-```js
+```conf
 server {
     listen 80;
     server_name rembg2.ivanageraldine.com;
@@ -73,7 +73,7 @@ curl http://91.108.126.37
 sudo vim /etc/nginx/sites-enabled/default
 ```
 
-```js
+```conf
 server {
     listen 80 default_server;
     listen [::]:80 default_server;

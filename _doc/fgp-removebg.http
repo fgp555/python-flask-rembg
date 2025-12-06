@@ -6,8 +6,8 @@
 # @BASE_URL=https://api.appsystered.com
 # @BASE_URL=http://3.137.211.145
 # @BASE_URL=https://dev.frankgp.com
-@BASE_URL=http://91.108.126.37
-# @BASE_URL=rembg2.ivanageraldine.com
+# @BASE_URL=http://91.108.126.37
+@BASE_URL=https://rembg2.ivanageraldine.com
 
 
 ###
@@ -83,8 +83,8 @@ Content-Type: image/png
 --boundary--
 
 
-### 6) WEBP redimensionado a 640 px
-POST {{BASE_URL}}/v2.0/removebg?format=webp&max_height=640
+### 6) WEBP redimensionado a 720 px
+POST {{BASE_URL}}/v2.0/removebg?format=webp&max_height=720
 X-Api-Key: MY_API_KEY
 Content-Type: multipart/form-data; boundary=boundary
 

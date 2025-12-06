@@ -121,7 +121,16 @@ def remove_background_v2():
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
+
+    # =========================
+    # ✅ MEDICIÓN REAL DEL WORKER
+    # =========================
+    t0 = time.perf_counter()
     output_data = remove(buf.read())
+    worker_ms = int((time.perf_counter() - t0) * 1000)
+
+    print(f"[WORKER] pid={os.getpid()} process_time_ms={worker_ms}")
+    # =========================
 
     # Abrir resultado de rembg
     img = Image.open(BytesIO(output_data))
