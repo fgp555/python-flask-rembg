@@ -98,7 +98,7 @@ sudo vim /etc/nginx/sites-available/removebg
 ```js
 server {
     listen 80;
-    server_name 91.108.126.37;
+    server_name rembg2.ivanageraldine.com;
 
     client_max_body_size 20M;
 
@@ -114,6 +114,7 @@ server {
 
 ```sh
 sudo ln -s /etc/nginx/sites-available/removebg /etc/nginx/sites-enabled/
+sudo vim /etc/nginx/sites-enabled/removebg
 sudo nginx -t
 sudo systemctl restart nginx
 
